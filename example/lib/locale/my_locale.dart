@@ -36,13 +36,13 @@ class GeneralUsage {
   static IconData of(BuildContext context) => Localizations.of<IconData>(context, IconData)!;
 
   static final delegate = WatashiDelegate(
-    defaultLocaleAgent: LocaleAgent(LocaleEnum.sys, LocaleEnum.sys.locale),
-    localeAgents: LocaleEnum.values.map((e) => LocaleAgent(e, e.locale)),
-    resultFactory: (e) => e.opt.iconData ?? Icons.question_mark,
+    defaultCandidate: LocaleCandidate(LocaleEnum.sys, LocaleEnum.sys.locale),
+    localeCandidates: LocaleEnum.values.map((e) => LocaleCandidate(e, e.locale)),
+    wrap: (e) => e.opt.iconData ?? Icons.question_mark,
   );
 }
 
-class DictInstanceAlias extends AliasPackage<DictInstance> {
+class DictInstanceAlias extends AliasWrapper<DictInstance> {
   const DictInstanceAlias(super.value);
 
   static late DictInstance _instance;
@@ -51,10 +51,10 @@ class DictInstanceAlias extends AliasPackage<DictInstance> {
       _instance = Localizations.of<DictInstanceAlias>(context, DictInstanceAlias)!.value;
 
   static final delegate = WatashiDictDelegate(
-    defaultLocaleAgent: LocaleAgentGetDict(LocaleEnum.en, LocaleEnum.en.locale, LocaleEnum.en.languageInstance),
-    localeAgents: LocaleEnum.values.map((e) => LocaleAgentGetDict(e, e.locale, e.languageInstance)),
-    dictKeys: DictKey.values,
-    packager: (value) => DictInstanceAlias(value),
+    defaultCandidate: DictLocaleCandidate(LocaleEnum.en, LocaleEnum.en.locale, LocaleEnum.en.languageInstance),
+    localeCandidates: LocaleEnum.values.map((e) => DictLocaleCandidate(e, e.locale, e.languageInstance)),
+    dictKeys: DictKey.values.toSet(),
+    dictWrap: (value) => DictInstanceAlias(value),
   );
 }
 

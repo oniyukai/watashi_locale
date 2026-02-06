@@ -7,12 +7,12 @@ Comprehensive documentation for implementing dictionary-based text translations 
 To set up a basic dictionary-based localization system, follow these steps based on the provided example structure:
 
 ### 1. Define Data Type and Wrapper Class
-Since Flutter looks up `Localizations` based on `Type`, we use an alias class to wrap our dictionary Map, allowing differentiation by type. This is unnecessary if your Types are non-duplicative.
+Since Flutter looks up `Localizations` based on `Type`, we use an alias class to wrap our dictionary Map, allowing differentiation by type. This is unnecessary if your types are unique.
 
 ```dart
 typedef DictInstance = Map<DictKey, String?>;
 
-class DictInstanceAlias extends AliasPackage<DictInstance> {
+class DictInstanceAlias extends AliasWrapper<DictInstance> {
   const DictInstanceAlias(super.value);
 
   static late DictInstance _instance;
@@ -23,16 +23,16 @@ class DictInstanceAlias extends AliasPackage<DictInstance> {
 
   // Define the WatashiDictDelegate
   static final delegate = WatashiDictDelegate(
-    localeAgents: LocaleEnum.values.map((e) => LocaleAgentGetDict(e, e.locale, e.languageInstance)),
-    defaultLocaleAgent: LocaleAgentGetDict(LocaleEnum.en, LocaleEnum.en.locale, LocaleEnum.en.languageInstance),
+    localeCandidates: LocaleEnum.values.map((e) => DictLocaleCandidate(e, e.locale, e.languageInstance)),
+    defaultCandidate: DictLocaleCandidate(LocaleEnum.en, LocaleEnum.en.locale, LocaleEnum.en.languageInstance),
     dictKeys: DictKey.values,
-    packager: (value) => DictInstanceAlias(value),
+    dictWrap: (value) => DictInstanceAlias(value),
   );
 }
 ```
 
 ### 2. Create Keys and Translations
-Use `enum` to manage translation keys, and leverage getter extensions for clean usage in the UI. Of course, this doesn't require using K<enum> V<String?> type.
+Use `enum` to manage translation keys, and leverage getter extensions for clean usage in the UI. Additionally, it is not limited to using K<enum> or V<String?>.
 
 ```dart
 enum DictKey {
@@ -47,7 +47,7 @@ const DictInstance enMap = { .deviceDefault: 'Device Default' };
 const DictInstance zhMap = { .deviceDefault: '裝置預設' };
 ```
 
-### 3. Configure Locale Agents
+### 3. Configure Locale Candidates
 Define which `Locale` corresponds to which list of dictionaries (supporting fallback via multiple Maps). For convenience, I use an enum to manage them.
 
 ```dart
@@ -90,10 +90,10 @@ You can use `WatashiDelegate` to return specific objects based on the locale. Fo
 class GeneralUsage {
   static IconData of(BuildContext context) => Localizations.of<IconData>(context, IconData)!;
 
-  static final delegate = WatashiDelegate<IconData, LocaleAgent<LocaleEnum>>(
-    defaultLocaleAgent: LocaleAgent(LocaleEnum.sys, LocaleEnum.sys.locale),
-    localeAgents: LocaleEnum.values.map((e) => LocaleAgent(e, e.locale)),
-    resultFactory: (agent) => agent.opt.iconData ?? Icons.question_mark,
+  static final delegate = WatashiDelegate<IconData, LocaleCandidate<LocaleEnum>>(
+    defaultCandidate: LocaleCandidate(LocaleEnum.sys, LocaleEnum.sys.locale),
+    localeCandidates: LocaleEnum.values.map((e) => LocaleCandidate(e, e.locale)),
+    wrap: (c) => c.opt.iconData ?? Icons.question_mark,
   );
 }
 ```
@@ -104,12 +104,12 @@ The package decides which locale "wins" using `LocalizedReferee`. By default, it
 You can inject `customReferees` to create unique fallback rules or tie-breakers:
 
 ### 3. Handling Multiple Delegates of the Same Type
-Flutter’s `Localizations.of<T>` identifies data by its Type. If you have two different dictionaries both using `Map<String, String>`, they will collide. To solve this, extend `AliasPackage`:
+Flutter’s `Localizations.of<T>` identifies data by its Type. If you have two different dictionaries both using `Map<String, String>`, they will collide. To solve this, extend `AliasWrapper`:
 
 ### 4. Automatic Integration
 When you use `WatashiLocale.register()`, the package automatically:
 - Merges your custom delegates with `GlobalMaterialLocalizations`.
-- Populates `supportedLocales` by scanning all registered `LocaleAgent` instances.
+- Populates `supportedLocales` by scanning all registered `LocaleCandidate` instances.
 - Prevents duplicate delegate registration via internal assertions.
 
 ## License

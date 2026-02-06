@@ -1,7 +1,7 @@
 # watashi_locale
 
-[![GitHub release](https://img.shields.io/github/v/release/oniyukai/watashi_locale.svg)](https://github.com/oniyukai/watashi_locale)
 [![GitHub License](https://img.shields.io/github/license/oniyukai/watashi_locale)](https://github.com/oniyukai/watashi_locale/blob/main/LICENSE)
+[![GitHub Release](https://img.shields.io/github/v/release/oniyukai/watashi_locale.svg)](https://github.com/oniyukai/watashi_locale)
 
 A flexible and lightweight Flutter localization package designed to simplify multi-level fallback dictionaries and custom locale matching.
 
@@ -13,6 +13,8 @@ A flexible and lightweight Flutter localization package designed to simplify mul
 - **Streamlined Registration Process**: Provides static tools for unified management of Delegate and Supported Locales, reducing boilerplate code.
 
 ## Getting started
+
+> Supported Platforms: `Android`, `iOS`, `Linux`, `MacOS`, `Web`, `Windows`.
 
 Add the dependency in your `pubspec.yaml` using GitHub:
 

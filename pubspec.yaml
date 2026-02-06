@@ -1,10 +1,10 @@
 name: watashi_locale
 description: A localization utility that supports multi-level dictionary merging, custom score-based locale matching and more.
-version: 0.0.1
+version: 0.0.2
 repository: https://github.com/oniyukai/watashi_locale.git
 
 environment:
-  sdk: ">=3.10.3 <4.0.0"
+  sdk: ">=3.10.8 <4.0.0"
   flutter: ">=3.38.0"
 
 dependencies:

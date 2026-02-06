@@ -1,4 +1,8 @@
-## 0.0.1
+## 0.0.2 (2026.02.07)
+
+- Rename variables, objects, and more.
+
+## 0.0.1 (2026.01.30)
 
 * **Initial Release**
 * Core functionality: Locale matching logic based on a weighted scoring system.

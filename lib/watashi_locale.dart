@@ -48,11 +48,11 @@ final class WatashiLocale {
     for (final delegate in delegates) {
       assert(!_typeDelegates.containsKey(delegate.type),
           'A LocalizationsDelegate for <${delegate.type}> is already registered. '
-          'To use multiple delegates for the same data type, wrap them in unique [AliasPackage] subclasses.');
+          'To use multiple delegates for the same data type, wrap them in unique [AliasWrapper] subclasses.');
       _typeDelegates[delegate.type] = delegate;
       _supportedLocales.addAll([
-        for (final localeAgent in delegate.localeAgents)
-          if (localeAgent.locale != null) localeAgent.locale!
+        for (final candidate in delegate.localeCandidates)
+          if (candidate.locale != null) candidate.locale!
       ]);
     }
   }
@@ -65,17 +65,17 @@ final class WatashiLocale {
 ///
 /// Extend this class to create unique types:
 /// ```dart
-/// class AuthStrings extends AliasPackage<MyData> { ... }
-/// class MenuStrings extends AliasPackage<MyData> { ... }
+/// class AuthStrings extends AliasWrapper<MyData> { ... }
+/// class MenuStrings extends AliasWrapper<MyData> { ... }
 /// ```
-abstract class AliasPackage<T> {
+abstract class AliasWrapper<T> {
   final T value;
 
-  const AliasPackage(this.value);
+  const AliasWrapper(this.value);
 }
 
 /// Represents a candidate for a specific [Locale].
-class LocaleAgent<OPT> {
+class LocaleCandidate<OPT> {
   /// The container for the provided locale options.
   ///
   /// This field holds the metadata or data source (such as an enum or configuration object)
@@ -84,74 +84,74 @@ class LocaleAgent<OPT> {
 
   final Locale? locale;
 
-  const LocaleAgent(this.opt, this.locale);
+  const LocaleCandidate(this.opt, this.locale);
 }
 
-/// Defines logic to score how well a [LocaleAgent] matches a requested [Locale].
+/// Defines logic to score how well a [LocaleCandidate] matches a requested [Locale].
 ///
 /// This allows for sophisticated resolution, such as prioritizing a specific
 /// country code or falling back to a script-only match.
-class LocalizedReferee<LA extends LocaleAgent> {
+class LocalizedReferee<LC extends LocaleCandidate> {
   /// A function that returns a matching score. Higher scores take precedence.
-  final double Function(LA, Locale) evaluate;
+  final double Function(LC, Locale) evaluate;
 
   const LocalizedReferee(this.evaluate);
 
   /// The standard matching logic.
   ///
   /// Matches language (16.0 pts), script (8.0 pts), and country (4.0 pts).
-  factory LocalizedReferee.regular() => LocalizedReferee((localeAgent, locale) {
-    if (localeAgent.locale == null) return -1.0;
+  factory LocalizedReferee.regular() => LocalizedReferee((candidate, locale) {
+    if (candidate.locale == null) return -1.0;
     double score = 0.0;
-    if (localeAgent.locale!.languageCode == locale.languageCode && locale.languageCode.isNotEmpty) score += 16.0;
-    if (localeAgent.locale!.scriptCode == locale.scriptCode && locale.scriptCode?.isNotEmpty == true) score += 8.0;
-    if (localeAgent.locale!.countryCode == locale.countryCode && locale.countryCode?.isNotEmpty == true) score += 4.0;
+    if (candidate.locale!.languageCode == locale.languageCode && locale.languageCode.isNotEmpty) score += 16.0;
+    if (candidate.locale!.scriptCode == locale.scriptCode && locale.scriptCode?.isNotEmpty == true) score += 8.0;
+    if (candidate.locale!.countryCode == locale.countryCode && locale.countryCode?.isNotEmpty == true) score += 4.0;
     return score;
   });
 }
 
 /// A highly configurable [LocalizationsDelegate] that uses [LocalizedReferee] to decide
-/// which [LA] best fits the user's system locale.
+/// which [LC] best fits the user's system locale.
 ///
-/// [AP] (AliasPackage) is the type of the resulting localized object.
-/// [LA] extends [LocaleAgent] is the type of the agent holding the locale data.
-class WatashiDelegate<AP, LA extends LocaleAgent> extends LocalizationsDelegate<AP> {
-  /// Used if no agents provide a satisfactory match.
-  final LA defaultLocaleAgent;
+/// [AW] (AliasWrapper) is the type of the resulting localized object.
+/// [LC] extends [LocaleCandidate] is the type of the candidate holding the locale data.
+class WatashiDelegate<AW, LC extends LocaleCandidate> extends LocalizationsDelegate<AW> {
+  /// Used if no candidates provide a satisfactory match.
+  final LC defaultCandidate;
 
-  /// The list of available agents (translations) for this delegate.
-  final Iterable<LA> localeAgents;
+  /// The list of available candidates (translations) for this delegate.
+  final Iterable<LC> localeCandidates;
 
-  /// Factory to convert the winning [LA] into the final [AP] instance.
-  final AP Function(LA) resultFactory;
+  /// A function to convert the winning [LC] into the final [AW] instance.
+  final AW Function(LC) wrap;
 
   /// Optional list of custom scoring rules to determine the best locale match.
-  final Iterable<LocalizedReferee<LA>>? customReferees;
+  final Iterable<LocalizedReferee<LC>>? customReferees;
 
   /// The default scoring system used if [customReferees] is null.
-  final Iterable<LocalizedReferee<LA>> defaultReferees = [LocalizedReferee.regular()];
+  final Iterable<LocalizedReferee<LC>> defaultReferees = [LocalizedReferee.regular()];
 
   WatashiDelegate({
-    required this.defaultLocaleAgent,
-    required this.localeAgents,
-    required this.resultFactory,
+    required this.defaultCandidate,
+    required this.localeCandidates,
+    required this.wrap,
     this.customReferees,
   }) {
-    assert(AP != dynamic, 'The $runtimeType type [AP] must be explicitly specified and cannot be dynamically typed.');
+    assert(AW != dynamic, 'The $runtimeType type [AW] must be explicitly specified and cannot be dynamically typed.');
   }
 
   @override
-  bool isSupported(locale) => localeAgents.any((e) => e.locale?.languageCode == locale.languageCode);
+  bool isSupported(locale) => localeCandidates.any((e) => e.locale?.languageCode == locale.languageCode);
 
   @override
   bool shouldReload(old) => false;
 
   @override
-  Future<AP> load(locale) {
-    Iterable<LA> competitors = localeAgents;
+  Future<AW> load(locale) {
+    Iterable<LC> competitors = localeCandidates;
     for (final referee in customReferees ?? defaultReferees) {
       if (competitors.length <= 1) break;
-      final List<LA> winners = [];
+      final List<LC> winners = [];
       double bestScore = double.negativeInfinity;
       for (final competitor in competitors) {
         final score = referee.evaluate(competitor, locale);
@@ -160,9 +160,9 @@ class WatashiDelegate<AP, LA extends LocaleAgent> extends LocalizationsDelegate<
         winners.add(competitor);
         bestScore = score;
       }
-      competitors = winners.isNotEmpty ? winners : [defaultLocaleAgent];
+      competitors = winners.isNotEmpty ? winners : [defaultCandidate];
     }
-    final winner = competitors.firstOrNull ?? defaultLocaleAgent;
-    return SynchronousFuture(resultFactory(winner));
+    final winner = competitors.firstOrNull ?? defaultCandidate;
+    return SynchronousFuture(wrap(winner));
   }
 }

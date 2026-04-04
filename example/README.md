@@ -73,7 +73,7 @@ void main() {
 // In MaterialApp configuration:
 MaterialApp(
   locale: currentLocale,
-  localizationsDelegates: WatashiLocale.localizationsDelegates,
+  localizationsDelegates: WatashiLocale.getDelegates(),
   supportedLocales: WatashiLocale.supportedLocales,
   home: MyHomePage(),
 );

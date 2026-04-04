@@ -1,3 +1,7 @@
+## 0.0.3 (2026.04.04)
+
+- Change `localizationsDelegates` to `getDelegates`, `GlobalMaterialLocalizations` is optional.
+
 ## 0.0.2 (2026.02.07)
 
 - Rename variables, objects, and more.

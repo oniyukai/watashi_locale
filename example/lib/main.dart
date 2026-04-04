@@ -15,7 +15,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:watashi_locale/watashi_locale.dart';
-import 'package:watashi_locale_example/locale/my_locale.dart';
+import 'package:watashi_locale_example/my_locale.dart';
 
 void main() {
   runApp(
@@ -63,7 +63,7 @@ class _MyAppState extends State<MyApp> {
           title: 'watashi_locale example',
           home: const MyHomePage(),
           locale: state.locale,
-          localizationsDelegates: WatashiLocale.localizationsDelegates,
+          localizationsDelegates: WatashiLocale.getDelegates(),
           supportedLocales: WatashiLocale.supportedLocales,
         );
       },

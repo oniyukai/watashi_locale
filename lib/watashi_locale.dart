@@ -17,32 +17,29 @@ import 'package:flutter/foundation.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
-export 'package:watashi_locale/dictionary_delegate.dart';
+export 'package:watashi_locale/src/dictionary_delegate.dart';
 
 /// A static utility for centralizing the management of [LocalizationsDelegate] instances.
 ///
-/// Use [register] to inject your custom delegates. This class automatically combines
-/// them with [GlobalMaterialLocalizations] delegates, providing a single source
+/// Use [register] to inject your custom delegates. Providing a single source
 /// for [MaterialApp.localizationsDelegates] and [MaterialApp.supportedLocales].
-final class WatashiLocale {
-  const WatashiLocale._();
-
+abstract final class WatashiLocale {
   static final Set<Locale> _supportedLocales = {};
 
-  static final _typeDelegates = {
-    for (final delegate in GlobalMaterialLocalizations.delegates)
-      delegate.type: delegate
-  };
+  static final _typeDelegates = <Type, WatashiDelegate>{};
 
   /// Returns a combined set of all supported locales registered through [register].
   static Set<Locale> get supportedLocales => Set.unmodifiable(_supportedLocales);
 
   /// Returns a collection of all registered delegates, including default Flutter material delegates.
-  static Iterable<LocalizationsDelegate> get localizationsDelegates => _typeDelegates.values;
+  static List<LocalizationsDelegate> getDelegates([bool withGlobal = true]) => [
+    ..._typeDelegates.values,
+    if (withGlobal) ...GlobalMaterialLocalizations.delegates,
+  ];
 
   /// Registers a list of [WatashiDelegate] instances.
   ///
-  /// This will update [supportedLocales] and [localizationsDelegates].
+  /// This will update [supportedLocales] and [getDelegates].
   /// Throws an assertion error if a delegate for the same [LocalizationsDelegate] type is already registered.
   static void register(Iterable<WatashiDelegate> delegates) {
     for (final delegate in delegates) {

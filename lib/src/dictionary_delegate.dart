@@ -41,10 +41,10 @@ class WatashiDictDelegate<AW, OPT, K, V> extends WatashiDelegate<AW, DictLocaleC
     required this.dictWrap,
     super.customReferees,
   }) : super(
-      wrap: (winner) => dictWrap({
-        for (final key in dictKeys)
-          key: winner.dictionaries.firstWhereOrNull((map) => map[key] != null)?[key],
-      })
+    wrap: (winner) => dictWrap({
+      for (final key in dictKeys)
+        key: winner.dictionaries.firstWhereOrNull((map) => map[key] != null)?[key],
+    }),
   );
 
   /// 1. Ensure the candidate actually has dictionaries.

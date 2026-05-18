@@ -32,7 +32,7 @@ abstract final class WatashiLocale {
   static Set<Locale> get supportedLocales => Set.unmodifiable(_supportedLocales);
 
   /// Returns a collection of all registered delegates, including default Flutter material delegates.
-  static List<LocalizationsDelegate> getDelegates([bool withGlobal = true]) => [
+  static List<LocalizationsDelegate> getDelegates({bool withGlobal = true}) => [
     ..._typeDelegates.values,
     if (withGlobal) ...GlobalMaterialLocalizations.delegates,
   ];

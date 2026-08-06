@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 export 'package:watashi_locale/src/dictionary_delegate.dart';
@@ -29,7 +29,7 @@ abstract final class WatashiLocale {
   static final _typeDelegates = <Type, WatashiDelegate>{};
 
   /// Returns a combined set of all supported locales registered through [register].
-  static Set<Locale> get supportedLocales => Set.unmodifiable(_supportedLocales);
+  static Set<Locale> get supportedLocales => _supportedLocales.toSet();
 
   /// Returns a collection of all registered delegates, including default Flutter material delegates.
   static List<LocalizationsDelegate> getDelegates({bool withGlobal = true}) => [
@@ -43,13 +43,15 @@ abstract final class WatashiLocale {
   /// Throws an assertion error if a delegate for the same [LocalizationsDelegate] type is already registered.
   static void register(Iterable<WatashiDelegate> delegates) {
     for (final delegate in delegates) {
-      assert(!_typeDelegates.containsKey(delegate.type),
-          'A LocalizationsDelegate for <${delegate.type}> is already registered. '
-          'To use multiple delegates for the same data type, wrap them in unique [AliasWrapper] subclasses.');
+      assert(
+        !_typeDelegates.containsKey(delegate.type),
+        'A LocalizationsDelegate for <${delegate.type}> is already registered. '
+        'To use multiple delegates for the same data type, wrap them in unique [AliasWrapper] subclasses.',
+      );
       _typeDelegates[delegate.type] = delegate;
       _supportedLocales.addAll([
         for (final candidate in delegate.localeCandidates)
-          if (candidate.locale != null) candidate.locale!
+          if (candidate.locale != null) candidate.locale!,
       ]);
     }
   }
@@ -100,9 +102,18 @@ class LocalizedReferee<LC extends LocaleCandidate> {
   factory LocalizedReferee.regular() => LocalizedReferee((candidate, locale) {
     if (candidate.locale == null) return -1.0;
     double score = 0.0;
-    if (candidate.locale!.languageCode == locale.languageCode && locale.languageCode.isNotEmpty) score += 16.0;
-    if (candidate.locale!.scriptCode == locale.scriptCode && locale.scriptCode?.isNotEmpty == true) score += 8.0;
-    if (candidate.locale!.countryCode == locale.countryCode && locale.countryCode?.isNotEmpty == true) score += 4.0;
+    if (candidate.locale!.languageCode == locale.languageCode &&
+        locale.languageCode.isNotEmpty) {
+      score += 16.0;
+    }
+    if (candidate.locale!.scriptCode == locale.scriptCode &&
+        locale.scriptCode?.isNotEmpty == true) {
+      score += 8.0;
+    }
+    if (candidate.locale!.countryCode == locale.countryCode &&
+        locale.countryCode?.isNotEmpty == true) {
+      score += 4.0;
+    }
     return score;
   });
 }
@@ -112,7 +123,8 @@ class LocalizedReferee<LC extends LocaleCandidate> {
 ///
 /// [AW] (AliasWrapper) is the type of the resulting localized object.
 /// [LC] extends [LocaleCandidate] is the type of the candidate holding the locale data.
-class WatashiDelegate<AW, LC extends LocaleCandidate> extends LocalizationsDelegate<AW> {
+class WatashiDelegate<AW, LC extends LocaleCandidate>
+    extends LocalizationsDelegate<AW> {
   /// Used if no candidates provide a satisfactory match.
   final LC defaultCandidate;
 
@@ -126,7 +138,9 @@ class WatashiDelegate<AW, LC extends LocaleCandidate> extends LocalizationsDeleg
   final Iterable<LocalizedReferee<LC>>? customReferees;
 
   /// The default scoring system used if [customReferees] is null.
-  final Iterable<LocalizedReferee<LC>> defaultReferees = [LocalizedReferee.regular()];
+  final Iterable<LocalizedReferee<LC>> defaultReferees = [
+    LocalizedReferee.regular(),
+  ];
 
   WatashiDelegate({
     required this.defaultCandidate,
@@ -134,11 +148,16 @@ class WatashiDelegate<AW, LC extends LocaleCandidate> extends LocalizationsDeleg
     required this.wrap,
     this.customReferees,
   }) {
-    assert(AW != dynamic, 'The $runtimeType type [AW] must be explicitly specified and cannot be dynamically typed.');
+    assert(
+      AW != dynamic,
+      'The $runtimeType type [AW] must be explicitly specified and cannot be dynamically typed.',
+    );
   }
 
   @override
-  bool isSupported(locale) => localeCandidates.any((e) => e.locale?.languageCode == locale.languageCode);
+  bool isSupported(locale) => localeCandidates.any(
+    (e) => e.locale?.languageCode == locale.languageCode,
+  );
 
   @override
   bool shouldReload(old) => false;
@@ -148,7 +167,7 @@ class WatashiDelegate<AW, LC extends LocaleCandidate> extends LocalizationsDeleg
     Iterable<LC> competitors = localeCandidates;
     for (final referee in customReferees ?? defaultReferees) {
       if (competitors.length <= 1) break;
-      final List<LC> winners = [];
+      final winners = <LC>[];
       double bestScore = double.negativeInfinity;
       for (final competitor in competitors) {
         final score = referee.evaluate(competitor, locale);

@@ -7,6 +7,7 @@ Comprehensive documentation for implementing dictionary-based text translations 
 To set up a basic dictionary-based localization system, follow these steps based on the provided example structure:
 
 ### 1. Define Data Type and Wrapper Class
+
 Since Flutter looks up `Localizations` based on `Type`, we use an alias class to wrap our dictionary Map, allowing differentiation by type. This is unnecessary if your types are unique.
 
 ```dart
@@ -23,8 +24,10 @@ class DictInstanceAlias extends AliasWrapper<DictInstance> {
 
   // Define the WatashiDictDelegate
   static final delegate = WatashiDictDelegate(
-    localeCandidates: LocaleEnum.values.map((e) => DictLocaleCandidate(e, e.locale, e.languageInstance)),
-    defaultCandidate: DictLocaleCandidate(LocaleEnum.en, LocaleEnum.en.locale, LocaleEnum.en.languageInstance),
+    localeCandidates: LocaleEnum.values.map((e) =>
+        DictLocaleCandidate(e, e.locale, e.languageInstance)),
+    defaultCandidate: DictLocaleCandidate(
+        LocaleEnum.en, LocaleEnum.en.locale, LocaleEnum.en.languageInstance),
     dictKeys: DictKey.values,
     dictWrap: (value) => DictInstanceAlias(value),
   );
@@ -32,6 +35,7 @@ class DictInstanceAlias extends AliasWrapper<DictInstance> {
 ```
 
 ### 2. Create Keys and Translations
+
 Use `enum` to manage translation keys, and leverage getter extensions for clean usage in the UI. Additionally, it is not limited to using K<enum> or V<String?>.
 
 ```dart
@@ -43,11 +47,12 @@ enum DictKey {
   String get s => DictInstanceAlias._instance[this] ?? '<$name>';
 }
 
-const DictInstance enMap = { .deviceDefault: 'Device Default' };
-const DictInstance zhMap = { .deviceDefault: '裝置預設' };
+const DictInstance enMap = { .deviceDefault: 'Device Default'};
+const DictInstance zhMap = { .deviceDefault: '裝置預設'};
 ```
 
 ### 3. Configure Locale Candidates
+
 Define which `Locale` corresponds to which list of dictionaries (supporting fallback via multiple Maps). For convenience, I use an enum to manage them.
 
 ```dart
@@ -57,11 +62,13 @@ enum LocaleEnum {
 
   final Locale? locale;
   final List<DictInstance> languageInstance;
+
   const LocaleEnum(this.locale, this.languageInstance);
 }
 ```
 
 ### 4. Register and Use
+
 In `void main` or before the first build `initState`, register the delegate with `WatashiLocale`:
 
 ```dart
@@ -84,6 +91,7 @@ MaterialApp(
 While `WatashiDictDelegate` is perfect for text translations, the core `WatashiDelegate` is designed to localize **any** data type—such as icons, theme configurations, or asset paths—using a powerful scoring system.
 
 ### 1. Localizing Non-Text Data (e.g., Icons)
+
 You can use `WatashiDelegate` to return specific objects based on the locale. For example, if you want to change an icon based on the user's region:
 
 ```dart
@@ -99,15 +107,19 @@ class GeneralUsage {
 ```
 
 ### 2. Custom Scoring with LocalizedReferee
+
 The package decides which locale "wins" using `LocalizedReferee`. By default, it scores matches based on Language (16pts), Script (8pts), and Country (4pts).
 
 You can inject `customReferees` to create unique fallback rules or tie-breakers:
 
 ### 3. Handling Multiple Delegates of the Same Type
+
 Flutter’s `Localizations.of<T>` identifies data by its Type. If you have two different dictionaries both using `Map<String, String>`, they will collide. To solve this, extend `AliasWrapper`:
 
 ### 4. Automatic Integration
+
 When you use `WatashiLocale.register()`, the package automatically:
+
 - Merges your custom delegates with `GlobalMaterialLocalizations`.
 - Populates `supportedLocales` by scanning all registered `LocaleCandidate` instances.
 - Prevents duplicate delegate registration via internal assertions.

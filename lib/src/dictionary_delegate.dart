@@ -27,7 +27,8 @@ class DictLocaleCandidate<OPT, K, V> extends LocaleCandidate<OPT> {
 ///
 /// It merges values from multiple dictionaries within the winning [DictLocaleCandidate].
 /// It prioritizes candidates that have the highest "completion rate" for the required [dictKeys].
-class WatashiDictDelegate<AW, OPT, K, V> extends WatashiDelegate<AW, DictLocaleCandidate<OPT, K ,V>> {
+class WatashiDictDelegate<AW, OPT, K, V>
+    extends WatashiDelegate<AW, DictLocaleCandidate<OPT, K, V>> {
   /// The full list of keys that this delegate is expected to provide.
   final Set<K> dictKeys;
 
@@ -41,22 +42,32 @@ class WatashiDictDelegate<AW, OPT, K, V> extends WatashiDelegate<AW, DictLocaleC
     required this.dictWrap,
     super.customReferees,
   }) : super(
-    wrap: (winner) => dictWrap({
-      for (final key in dictKeys)
-        key: winner.dictionaries.firstWhereOrNull((map) => map[key] != null)?[key],
-    }),
-  );
+         wrap: (winner) => dictWrap({
+           for (final key in dictKeys)
+             key: winner.dictionaries.firstWhereOrNull(
+               (map) => map[key] != null,
+             )?[key],
+         }),
+       );
 
   /// 1. Ensure the candidate actually has dictionaries.
   /// 2. Standard locale matching.
   /// 3. Completion tie-breaker: If two candidates match the locale, pick the one with more filled keys
   /// and fewer fragmented dictionary layers.
   @override
-  Iterable<LocalizedReferee<DictLocaleCandidate<OPT, K ,V>>> get defaultReferees => [
-    LocalizedReferee((candidate, _) => candidate.dictionaries.isEmpty ? -1.0 : 1.0),
+  Iterable<LocalizedReferee<DictLocaleCandidate<OPT, K, V>>>
+  get defaultReferees => [
+    LocalizedReferee(
+      (candidate, _) => candidate.dictionaries.isEmpty ? -1.0 : 1.0,
+    ),
     ...super.defaultReferees,
-    LocalizedReferee((candidate, _) => 1.0 / candidate.dictionaries.length +
-        candidate.dictionaries.first.entries.where((e) => e.value != null && dictKeys.contains(e.key)).length / dictKeys.length,
+    LocalizedReferee(
+      (candidate, _) =>
+          1.0 / candidate.dictionaries.length +
+          candidate.dictionaries.first.entries
+                  .where((e) => e.value != null && dictKeys.contains(e.key))
+                  .length /
+              dictKeys.length,
     ),
   ];
 }

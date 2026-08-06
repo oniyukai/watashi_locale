@@ -22,7 +22,7 @@ void main() {
     ChangeNotifierProvider(
       create: (context) => MyAppProvider(),
       child: const MyApp(),
-    )
+    ),
   );
 }
 
@@ -35,11 +35,16 @@ class MyApp extends StatefulWidget {
 
 class MyAppProvider extends ChangeNotifier {
   Locale? _locale;
-  Locale get locale => _locale ?? WidgetsBinding.instance.platformDispatcher.locale;
+
+  Locale get locale =>
+      _locale ?? WidgetsBinding.instance.platformDispatcher.locale;
 
   void updateLocale(Locale? newLocale) {
     debugPrint('MyAppProvider.updateLocale($newLocale -> $locale)');
-    if (newLocale == _locale && newLocale?.countryCode == _locale?.countryCode) return;
+    if (newLocale == _locale &&
+        newLocale?.countryCode == _locale?.countryCode) {
+      return;
+    }
     _locale = newLocale;
     notifyListeners();
   }
@@ -49,10 +54,7 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    WatashiLocale.register([
-      GeneralUsage.delegate,
-      DictInstanceAlias.delegate,
-    ]);
+    WatashiLocale.register([GeneralUsage.delegate, DictInstanceAlias.delegate]);
   }
 
   @override
@@ -85,7 +87,7 @@ class MyHomePage extends StatelessWidget {
       ),
       body: Center(
         child: Column(
-          mainAxisAlignment: .center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text('Current Locale: ${appProvider.locale}'),
             ElevatedButton(
@@ -97,18 +99,21 @@ class MyHomePage extends StatelessWidget {
               child: Text('showLicensePage'),
             ),
             Row(
-              mainAxisSize: .min,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 ElevatedButton(
-                  onPressed: () => appProvider.updateLocale(LocaleEnum.en.locale),
+                  onPressed: () =>
+                      appProvider.updateLocale(LocaleEnum.en.locale),
                   child: Text('${LocaleEnum.en.locale}'),
                 ),
                 ElevatedButton(
-                  onPressed: () => appProvider.updateLocale(LocaleEnum.zhHant.locale),
+                  onPressed: () =>
+                      appProvider.updateLocale(LocaleEnum.zhHant.locale),
                   child: Text('${LocaleEnum.zhHant.locale}'),
                 ),
                 ElevatedButton(
-                  onPressed: () => appProvider.updateLocale(LocaleEnum.zhHans.locale),
+                  onPressed: () =>
+                      appProvider.updateLocale(LocaleEnum.zhHans.locale),
                   child: Text('${LocaleEnum.zhHans.locale}'),
                 ),
               ],

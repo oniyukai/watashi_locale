@@ -10,9 +10,16 @@ void main() {
       final candidate = LocaleCandidate('test', const Locale('zh', 'TW'));
 
       final scoreExact = referee.evaluate(candidate, const Locale('zh', 'TW'));
-      final scorePartial = referee.evaluate(candidate, const Locale('zh', 'CN'));
+      final scorePartial = referee.evaluate(
+        candidate,
+        const Locale('zh', 'CN'),
+      );
 
-      expect(scoreExact > scorePartial, true, reason: 'Exact match (Lang+Country) should be preferred');
+      expect(
+        scoreExact > scorePartial,
+        true,
+        reason: 'Exact match (Lang+Country) should be preferred',
+      );
     });
 
     test('Language match should score higher than no match', () {
@@ -32,14 +39,25 @@ void main() {
       final delegate = WatashiDictDelegate<Map, String, String, String>(
         dictKeys: const {'title', 'desc'},
         dictWrap: (map) => map,
-        defaultCandidate: DictLocaleCandidate('en', const Locale('en'), [primary, fallback]),
+        defaultCandidate: DictLocaleCandidate('en', const Locale('en'), [
+          primary,
+          fallback,
+        ]),
         localeCandidates: [],
       );
 
       final result = await delegate.load(const Locale('en'));
 
-      expect(result['title'], 'Hello', reason: 'Should take value from the first dictionary');
-      expect(result['desc'], 'World', reason: 'Should fallback to second dictionary for missing keys');
+      expect(
+        result['title'],
+        'Hello',
+        reason: 'Should take value from the first dictionary',
+      );
+      expect(
+        result['desc'],
+        'World',
+        reason: 'Should fallback to second dictionary for missing keys',
+      );
     });
   });
 }

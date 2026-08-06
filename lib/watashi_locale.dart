@@ -21,7 +21,7 @@ export 'package:watashi_locale/src/dictionary_delegate.dart';
 
 /// A static utility for centralizing the management of [LocalizationsDelegate] instances.
 ///
-/// Use [register] to inject your custom delegates. Providing a single source
+/// Use [register] to inject your custom delegates, providing a single source
 /// for [MaterialApp.localizationsDelegates] and [MaterialApp.supportedLocales].
 abstract final class WatashiLocale {
   static final Set<Locale> _supportedLocales = {};
@@ -31,7 +31,10 @@ abstract final class WatashiLocale {
   /// Returns a combined set of all supported locales registered through [register].
   static Set<Locale> get supportedLocales => _supportedLocales.toSet();
 
-  /// Returns a collection of all registered delegates, including default Flutter material delegates.
+  /// Returns a collection of all registered delegates, including Flutter's
+  /// global localizations delegates (material, widgets, cupertino).
+  ///
+  /// Set [withGlobal] to `false` to exclude them.
   static List<LocalizationsDelegate> getDelegates({bool withGlobal = true}) => [
     ..._typeDelegates.values,
     if (withGlobal) ...GlobalMaterialLocalizations.delegates,
@@ -121,8 +124,11 @@ class LocalizedReferee<LC extends LocaleCandidate> {
 /// A highly configurable [LocalizationsDelegate] that uses [LocalizedReferee] to decide
 /// which [LC] best fits the user's system locale.
 ///
-/// [AW] (AliasWrapper) is the type of the resulting localized object.
+/// [AW] is the type of the resulting localized object.
 /// [LC] extends [LocaleCandidate] is the type of the candidate holding the locale data.
+///
+/// Extend [AliasWrapper] and use the subclass as [AW] when multiple delegates
+/// would otherwise share the same resulting [Type].
 class WatashiDelegate<AW, LC extends LocaleCandidate>
     extends LocalizationsDelegate<AW> {
   /// Used if no candidates provide a satisfactory match.

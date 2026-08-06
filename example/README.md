@@ -110,11 +110,37 @@ class GeneralUsage {
 
 The package decides which locale "wins" using `LocalizedReferee`. By default, it scores matches based on Language (16pts), Script (8pts), and Country (4pts).
 
-You can inject `customReferees` to create unique fallback rules or tie-breakers:
+You can inject `customReferees` to create unique fallback rules or tie-breakers. Referees run in order, and each one narrows the previous set of winners. Note that when `customReferees` is provided, the default scoring (`LocalizedReferee.regular()`) is not applied automatically — include it explicitly if you still need it:
+
+```dart
+static final customDelegate =
+    WatashiDelegate<IconData, LocaleCandidate<LocaleEnum>>(
+  defaultCandidate: LocaleCandidate(LocaleEnum.sys, LocaleEnum.sys.locale),
+  localeCandidates: LocaleEnum.values.map((e) => LocaleCandidate(e, e.locale)),
+  customReferees: [
+    // Standard language/script/country scoring first...
+    LocalizedReferee.regular(),
+    // ...then a tie-breaker that always prefers the `en` candidate.
+    LocalizedReferee((candidate, locale) =>
+        candidate.locale?.languageCode == 'en' ? 1.0 : 0.0),
+  ],
+  wrap: (c) => c.opt.iconData ?? Icons.question_mark,
+);
+```
 
 ### 3. Handling Multiple Delegates of the Same Type
 
-Flutter’s `Localizations.of<T>` identifies data by its Type. If you have two different dictionaries both using `Map<String, String>`, they will collide. To solve this, extend `AliasWrapper`:
+Flutter’s `Localizations.of<T>` identifies data by its Type. If you have two different dictionaries both using `Map<String, String>`, they will collide. To solve this, extend `AliasWrapper` to create unique types, then register one `WatashiDictDelegate` per alias (see the basic dictionary example above for the full wiring):
+
+```dart
+class AuthStrings extends AliasWrapper<Map<String, String>> {
+  const AuthStrings(super.value);
+}
+
+class MenuStrings extends AliasWrapper<Map<String, String>> {
+  const MenuStrings(super.value);
+}
+```
 
 ### 4. Automatic Integration
 

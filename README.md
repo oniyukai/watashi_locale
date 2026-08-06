@@ -43,7 +43,7 @@ At the UI level, you can intuitively access translated text:
 @override
 Widget build(BuildContext context) {
   // 1. Load the current language instance at the page entry point
-  AliasDictInstance.load(context);
+  DictInstanceAlias.load(context);
 
   return Scaffold(
     body: Center(

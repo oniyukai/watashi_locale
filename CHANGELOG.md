@@ -1,3 +1,10 @@
+## 0.2.0 (2026.08.28)
+
+- **Breaking**: Raised the minimum requirements to Dart `^3.12.0` and Flutter `>=3.44.0` (required by the new `material_ui` dependency).
+- **Breaking**: Dropped the direct `flutter_localizations` dependency in favor of the official `material_ui` package (the extracted Flutter Material library). `GlobalMaterialLocalizations` is now provided through `material_ui`; if your app relied on `flutter_localizations` transitively via this package, add it to your own dependencies.
+- Migrated the example app and tests to `material_ui` and refreshed transitive dependencies.
+- Excluded generated and platform-specific directories from static analysis.
+
 ## 0.1.0 (2026.08.07)
 
 - **Breaking**: `getDelegates` now accepts `withGlobal` as a named parameter instead of a positional one; use `getDelegates(withGlobal: false)`.
@@ -16,8 +23,8 @@
 
 ## 0.0.1 (2026.01.30)
 
-* **Initial Release**
-* Core functionality: locale matching logic based on a weighted scoring system.
-* Supports merging multiple dictionaries to enable flexible key-value translation fallback.
-* Resolves Flutter `Localizations.of<T>`'s inability to distinguish identical types.
-* Provides a global registrar that simplifies `localizationsDelegates` configuration in `MaterialApp`.
+- **Initial Release**
+- Core functionality: locale matching logic based on a weighted scoring system.
+- Supports merging multiple dictionaries to enable flexible key-value translation fallback.
+- Resolves Flutter `Localizations.of<T>`'s inability to distinguish identical types.
+- Provides a global registrar that simplifies `localizationsDelegates` configuration in `MaterialApp`.
